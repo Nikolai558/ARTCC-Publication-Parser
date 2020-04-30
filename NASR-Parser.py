@@ -1,11 +1,13 @@
 import tkinter as tk
 import os
+from sys import exit
 import xml.etree.ElementTree as ET
 import requests
 import urllib.request
 from tkinter import font as tkfont, filedialog
 from io import BytesIO
 from tkcalendar import DateEntry
+from babel.numbers import *
 from zipfile import ZipFile
 from tkinter import ttk
 
@@ -15,6 +17,12 @@ class NasrParser(tk.Tk):
         self.user_input1 = None
         self.user_input2 = None
         self.user_input3 = None
+
+        self.do_all = True
+
+        self.all_artccs = ['All Artcc', 'ZAP', 'ZAN', 'ZJX', 'ZME', 'ZTL', 'ZHU', 'ZID', 'ZFW', 'ZKC', 'ZHN', 'ZAB',
+                           'ZLA', 'ZDV', 'ZSE', 'ZOA', 'ZUA', 'ZBW', 'ZNY', 'ZDC', 'ZMA', 'ZAU', 'ZMP', 'ZLC', 'ZOB',
+                           'ZYZ', 'ZSU', 'ZVR', 'ZEG', 'FIM', 'SBA', 'ZAK', 'ZUL', 'ZWG']
 
         self.exe_directory = os.getcwd()
         self.in_directory = os.getcwd()
@@ -36,6 +44,8 @@ class NasrParser(tk.Tk):
 
         tk.Tk.__init__(self, *args, **kwargs)
         self.title_font = tkfont.Font(family='Helvetica', size=12, slant="italic")
+        self.helv10 = tkfont.Font(family='Helvetica', size=10)
+        self.helv12 = tkfont.Font(family='Helvetica', size=12)
         self.logo = tk.PhotoImage(file="zlclogo.png")
         self.wip = tk.PhotoImage(file="wip.png")
 
@@ -46,7 +56,7 @@ class NasrParser(tk.Tk):
         instruction_menu.add_command(label="Help",
                                      command=lambda: self.show_frame("WorkInProgress"))
         instruction_menu.add_separator()
-        instruction_menu.add_command(label="Quit",
+        instruction_menu.add_command(label="exit",
                                      command=lambda: self.show_frame("WorkInProgress"))
         menu_bar.add_cascade(label="About / Help", menu=instruction_menu)
         self.config(menu=menu_bar)
@@ -71,6 +81,18 @@ class NasrParser(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
         self.show_frame("SplashScreen")
 
+    # def artcc_list(self):
+    #     with open(f"{self.in_directory}/APT.txt", "r") as apt_file:
+    #         text = apt_file.read()
+    #         lines = text.split("\n")
+    #
+    #         for line in lines:
+    #             line_type = line[0:3]
+    #             if line_type == "APT":
+    #                 code = line[674:677]
+    #                 self.all_artccs.append(code)
+
+
     def get_apt_txt(self):
         if self.has_apt_file == "NO":
             text = str(self.user_input3)
@@ -89,6 +111,7 @@ class NasrParser(tk.Tk):
                         for line in my_zip_file.open(contained_file).readlines():
                             # print(line)
                             output.write(line)
+                        my_zip_file.close()
 
 
             self.has_apt_file = "YES"
@@ -98,150 +121,314 @@ class NasrParser(tk.Tk):
             # They already have the APT.TXT file. No further action needed, unless they lied about the location of it.
             pass
 
-        self.get_apt_in_artcc()
-        self.get_procedures()
+        self.get_apt_in_artcc(self.do_all)
+        self.get_procedures(self.do_all)
+
         self.show_frame("CompletedScreen")
 
-    def get_apt_in_artcc(self):
-        input_file = None
+    def get_apt_in_artcc(self, doing_all):
+        if doing_all is True:
+            x_var = 0
+            input_file = None
 
-        try:
-            input_file = open(f"{self.in_directory}/APT.txt", "r")
-            print(f"APT.TXT FILE FOUND: {self.in_directory}")
-        except FileNotFoundError:
-            # Basic error message right now. Need to have in case user selects wrong input directory.
-            # This will in the future be automated to take them back to select a new input directory.
-            # TODO: If user selects 'invalid' directory, doesnt cause crash and they can select new one.
-            print("ERROR: FILE_NOT_FOUND - {}/APT.TXT".format(self.in_directory))
-            quit()
+            try:
+                input_file = open(f"{self.in_directory}/APT.txt", "r")
+                print(f"APT.TXT FILE FOUND: {self.in_directory}")
+            except FileNotFoundError:
+                # Basic error message right now. Need to have in case user selects wrong input directory.
+                # This will in the future be automated to take them back to select a new input directory.
+                # TODO: If user selects 'invalid' directory, doesnt cause crash and they can select new one.
+                print("ERROR: FILE_NOT_FOUND - {}/APT.TXT".format(self.in_directory))
+                exit()
 
-        text = input_file.read()
-        lines = text.split("\n")
-        responsible_artcc = self.user_input1
+            text = input_file.read()
+            lines = text.split("\n")
 
-        try:
-            os.mkdir(f"{self.out_directory}/{self.user_input1}_{self.user_input2}")
-        except FileExistsError:
-            # print("ERROR: FILE_EXISTS_ERROR!")
-            # IF this part of the code is reached, the Folder already exists.
-            # We don't need to do anything if this is the case we just Pass.
-            pass
+            try:
+                os.mkdir(f"{self.out_directory}/{self.user_input1}_{self.user_input2}")
+            except FileExistsError:
+                # print("ERROR: FILE_EXISTS_ERROR!")
+                # IF this part of the code is reached, the Folder already exists.
+                # We don't need to do anything if this is the case we just Pass.
+                pass
 
-        # Create the Three output files we need. This is okay as long as we close them when we are done with them.
-        apt_output_file = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
-                                                                    self.user_input1,
-                                                                    self.user_input2,
-                                                                    self.user_input1,
-                                                                    self.user_input2), "w")
+            # Create the Three output files we need. This is okay as long as we close them when we are done with them.
 
-        for line in lines:
-            line_type = line[0:3]
-            artcc = line[674:677]
+            for working_artcc in self.all_artccs:
+                x_var += 1
+                if x_var > len(self.all_artccs):
+                    x_var = False
+                if x_var is not False:
+                    try:
+                        os.mkdir(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}")
+                    except FileExistsError:
+                        # print("ERROR: FILE_EXISTS_ERROR!")
+                        # IF this part of the code is reached, the Folder already exists.
+                        # We don't need to do anything if this is the case we just Pass.
+                        pass
 
-            if line_type == "APT":
-                if artcc == responsible_artcc:
-                    airport = line[27:31]
-                    f_string = "%s\n" % airport
-                    apt_output_file.write(f_string)
+                    apt_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+                                                                                             self.user_input2,
+                                                                                             working_artcc,
+                                                                                             self.user_input2,
+                                                                                             working_artcc,
+                                                                                             self.user_input2), "w")
+                    for line in lines:
+                        line_type = line[0:3]
+                        artcc = line[674:677]
 
-        apt_output_file.close()
+                        if line_type == "APT":
+                            if artcc == working_artcc:
+                                airport = line[27:31]
+                                f_string = "%s\n" % airport
+                                apt_output_file.write(f_string)
 
-    def get_procedures(self):
-        procedure_output_file = open("{}/{}_{}/{}_{}_PROCEDURES.TXT".format(self.out_directory,
-                                                                            self.user_input1,
-                                                                            self.user_input2,
-                                                                            self.user_input1,
-                                                                            self.user_input2), "w")
-        procedure_changes_output_file = open("{}/{}_{}/{}_{}_PROCEDURE_CHANGES.TXT".format(self.out_directory,
-                                                                                           self.user_input1,
-                                                                                           self.user_input2,
-                                                                                           self.user_input1,
-                                                                                           self.user_input2), "w")
-        apt_in_artcc = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
-                                                                 self.user_input1,
-                                                                 self.user_input2,
-                                                                 self.user_input1,
-                                                                 self.user_input2), "r")
-        apt_txt = apt_in_artcc.read()
-        apt_lines = apt_txt.split("\n")
+                    apt_output_file.close()
 
-        # Downloads the META file.
-        try:
-            meta_file = open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "r")
-            print(F"FOUND META FILE: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
-            meta_file.close()
-            self.has_meta_file = "YES"
-        except FileNotFoundError:
-            self.has_meta_file = "NO"
-            print("META FILE NOT FOUND DOWNLOADING IT NOW.")
+                else:
+                    pass
 
-            url = f"https://aeronav.faa.gov/d-tpp/{self.user_input2}/xml_data/d-tpp_Metafile.xml"
-            faa_website_resp = requests.get(url)
+        else:
+            input_file = None
 
-            with open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "wb") as file:
-                for chunk in faa_website_resp.iter_content(chunk_size=1024):
-                    if chunk:
-                        # self.current_bytes += 1024
-                        file.write(chunk)
-            print(F"META FILE DOWNLOAD COMPLETE. \nLocation: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
-            self.has_meta_file = "YES"
+            try:
+                input_file = open(f"{self.in_directory}/APT.txt", "r")
+                print(f"APT.TXT FILE FOUND: {self.in_directory}")
+            except FileNotFoundError:
+                # Basic error message right now. Need to have in case user selects wrong input directory.
+                # This will in the future be automated to take them back to select a new input directory.
+                # TODO: If user selects 'invalid' directory, doesnt cause crash and they can select new one.
+                print("ERROR: FILE_NOT_FOUND - {}/APT.TXT".format(self.in_directory))
+                exit()
 
-        tree = ET.parse(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
-        root = tree.getroot()
+            text = input_file.read()
+            lines = text.split("\n")
+            responsible_artcc = self.user_input1
 
-        for state in root.iter('state_code'):
-            for city in state.iter('city_name'):
-                for airport in city.iter('airport_name'):
-                    for line in apt_lines:
-                        wanted_apt = line[:].strip(" ")
-                        if wanted_apt == airport.attrib['apt_ident']:
-                            procedure_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
-                            for record in airport.iter('record'):
-                                procedure_output_file.write(f"      {record[2].text} ")
-                                procedure_output_file.write("| https://aeronav.faa.gov/d-tpp/{}/{}\n".format(
-                                    self.user_input2,
-                                    record[4].text
-                                ))
-                        else:
-                            # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
-                            pass
-        procedure_output_file.close()
+            try:
+                os.mkdir(f"{self.out_directory}/{self.user_input1}_{self.user_input2}")
+            except FileExistsError:
+                # print("ERROR: FILE_EXISTS_ERROR!")
+                # IF this part of the code is reached, the Folder already exists.
+                # We don't need to do anything if this is the case we just Pass.
+                pass
 
-        for state in root.iter('state_code'):
-            for city in state.iter('city_name'):
-                for airport in city.iter('airport_name'):
-                    for line in apt_lines:
-                        wanted_apt = line[:].strip(" ")
-                        if wanted_apt == airport.attrib['apt_ident']:
-                            procedure_changes_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+            # Create the Three output files we need. This is okay as long as we close them when we are done with them.
 
-                            for record in airport.iter('record'):
-                                link_text = record[4].text
-                                link_text_striped = link_text[:-4]
+            apt_output_file = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+                                                                        self.user_input1,
+                                                                        self.user_input2,
+                                                                        self.user_input1,
+                                                                        self.user_input2), "w")
 
-                                # print(link_text_striped)
-                                link_comp = "https://aeronav.faa.gov/d-tpp/{}/compare_pdf/{}_cmp.pdf".format(
-                                    self.user_input2,
-                                    link_text_striped
-                                )
+            for line in lines:
+                line_type = line[0:3]
+                artcc = line[674:677]
 
-                                if record[3].text == "A":
-                                    procedure_changes_output_file.write(f"      ({record[3].text}) ")
-                                    procedure_changes_output_file.write(f"{record[2].text}\n")
-                                elif record[3].text == "C":
-                                    procedure_changes_output_file.write(f"      ({record[3].text}) ")
-                                    procedure_changes_output_file.write(f"{record[2].text} | {link_comp}\n")
-                                elif record[3].text == "D":
-                                    procedure_changes_output_file.write(f"      ({record[3].text}) ")
-                                    procedure_changes_output_file.write(f"{record[2].text}\n")
-                                else:
-                                    pass
-                        else:
-                            # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
-                            pass
+                if line_type == "APT":
+                    if artcc == responsible_artcc:
+                        airport = line[27:31]
+                        f_string = "%s\n" % airport
+                        apt_output_file.write(f_string)
 
-        procedure_changes_output_file.close()
-        apt_in_artcc.close()
+            apt_output_file.close()
+            input_file.close()
+
+
+    def get_procedures(self, doing_all):
+        if doing_all is True:
+            x_var = 0
+
+            # Downloads the META file.
+            try:
+                meta_file = open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "r")
+                print(F"FOUND META FILE: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+                meta_file.close()
+                self.has_meta_file = "YES"
+            except FileNotFoundError:
+                self.has_meta_file = "NO"
+                print("META FILE NOT FOUND DOWNLOADING IT NOW.")
+
+                url = f"https://aeronav.faa.gov/d-tpp/{self.user_input2}/xml_data/d-tpp_Metafile.xml"
+                faa_website_resp = requests.get(url)
+
+                with open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "wb") as file:
+                    for chunk in faa_website_resp.iter_content(chunk_size=1024):
+                        if chunk:
+                            file.write(chunk)
+                print(
+                    F"META FILE DOWNLOAD COMPLETE. \nLocation: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+                self.has_meta_file = "YES"
+
+            for working_artcc in self.all_artccs:
+                x_var += 1
+                if x_var > len(self.all_artccs):
+                    x_var = False
+                if x_var is not False:
+
+                    procedure_output_file = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_PROCEDURES.TXT", "w")
+
+                    procedure_changes_output_file = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_PROCEDURE_CHANGES.TXT", "w")
+
+                    apt_in_artcc = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_AIRPORTS.TXT", "r")
+
+                    apt_txt = apt_in_artcc.read()
+                    apt_lines = apt_txt.split("\n")
+
+                    tree = ET.parse(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+                    root = tree.getroot()
+
+                    for state in root.iter('state_code'):
+                        for city in state.iter('city_name'):
+                            for airport in city.iter('airport_name'):
+                                for line in apt_lines:
+                                    wanted_apt = line[:].strip(" ")
+                                    if wanted_apt == airport.attrib['apt_ident']:
+                                        procedure_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+                                        for record in airport.iter('record'):
+                                            procedure_output_file.write(f"      {record[2].text} ")
+                                            procedure_output_file.write("| https://aeronav.faa.gov/d-tpp/{}/{}\n".format(
+                                                self.user_input2,
+                                                record[4].text
+                                            ))
+                                    else:
+                                        # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
+                                        pass
+                    procedure_output_file.close()
+
+                    for state in root.iter('state_code'):
+                        for city in state.iter('city_name'):
+                            for airport in city.iter('airport_name'):
+                                for line in apt_lines:
+                                    wanted_apt = line[:].strip(" ")
+                                    if wanted_apt == airport.attrib['apt_ident']:
+                                        procedure_changes_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+
+                                        for record in airport.iter('record'):
+                                            link_text = record[4].text
+                                            link_text_striped = link_text[:-4]
+
+                                            # print(link_text_striped)
+                                            link_comp = "https://aeronav.faa.gov/d-tpp/{}/compare_pdf/{}_cmp.pdf".format(
+                                                self.user_input2,
+                                                link_text_striped
+                                            )
+
+                                            if record[3].text == "A":
+                                                procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                                procedure_changes_output_file.write(f"{record[2].text}\n")
+                                            elif record[3].text == "C":
+                                                procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                                procedure_changes_output_file.write(f"{record[2].text} | {link_comp}\n")
+                                            elif record[3].text == "D":
+                                                procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                                procedure_changes_output_file.write(f"{record[2].text}\n")
+                                            else:
+                                                pass
+                                    else:
+                                        # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
+                                        pass
+
+                    procedure_changes_output_file.close()
+                    apt_in_artcc.close()
+                    meta_file.close()
+                else:
+                    pass
+        else:
+            procedure_output_file = open("{}/{}_{}/{}_{}_PROCEDURES.TXT".format(self.out_directory,
+                                                                                self.user_input1,
+                                                                                self.user_input2,
+                                                                                self.user_input1,
+                                                                                self.user_input2), "w")
+            procedure_changes_output_file = open("{}/{}_{}/{}_{}_PROCEDURE_CHANGES.TXT".format(self.out_directory,
+                                                                                               self.user_input1,
+                                                                                               self.user_input2,
+                                                                                               self.user_input1,
+                                                                                               self.user_input2), "w")
+            apt_in_artcc = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+                                                                     self.user_input1,
+                                                                     self.user_input2,
+                                                                     self.user_input1,
+                                                                     self.user_input2), "r")
+            apt_txt = apt_in_artcc.read()
+            apt_lines = apt_txt.split("\n")
+
+            # Downloads the META file.
+            try:
+                meta_file = open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "r")
+                print(F"FOUND META FILE: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+                meta_file.close()
+                self.has_meta_file = "YES"
+            except FileNotFoundError:
+                self.has_meta_file = "NO"
+                print("META FILE NOT FOUND DOWNLOADING IT NOW.")
+
+                url = f"https://aeronav.faa.gov/d-tpp/{self.user_input2}/xml_data/d-tpp_Metafile.xml"
+                faa_website_resp = requests.get(url)
+
+                with open(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml", "wb") as file:
+                    for chunk in faa_website_resp.iter_content(chunk_size=1024):
+                        if chunk:
+                            file.write(chunk)
+                print(F"META FILE DOWNLOAD COMPLETE. \nLocation: {self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+                self.has_meta_file = "YES"
+
+            tree = ET.parse(f"{self.in_directory}/PROCEDURE_META_{self.user_input2}.xml")
+            root = tree.getroot()
+
+            for state in root.iter('state_code'):
+                for city in state.iter('city_name'):
+                    for airport in city.iter('airport_name'):
+                        for line in apt_lines:
+                            wanted_apt = line[:].strip(" ")
+                            if wanted_apt == airport.attrib['apt_ident']:
+                                procedure_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+                                for record in airport.iter('record'):
+                                    procedure_output_file.write(f"      {record[2].text} ")
+                                    procedure_output_file.write("| https://aeronav.faa.gov/d-tpp/{}/{}\n".format(
+                                        self.user_input2,
+                                        record[4].text
+                                    ))
+                            else:
+                                # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
+                                pass
+            procedure_output_file.close()
+
+            for state in root.iter('state_code'):
+                for city in state.iter('city_name'):
+                    for airport in city.iter('airport_name'):
+                        for line in apt_lines:
+                            wanted_apt = line[:].strip(" ")
+                            if wanted_apt == airport.attrib['apt_ident']:
+                                procedure_changes_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+
+                                for record in airport.iter('record'):
+                                    link_text = record[4].text
+                                    link_text_striped = link_text[:-4]
+
+                                    # print(link_text_striped)
+                                    link_comp = "https://aeronav.faa.gov/d-tpp/{}/compare_pdf/{}_cmp.pdf".format(
+                                        self.user_input2,
+                                        link_text_striped
+                                    )
+
+                                    if record[3].text == "A":
+                                        procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                        procedure_changes_output_file.write(f"{record[2].text}\n")
+                                    elif record[3].text == "C":
+                                        procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                        procedure_changes_output_file.write(f"{record[2].text} | {link_comp}\n")
+                                    elif record[3].text == "D":
+                                        procedure_changes_output_file.write(f"      ({record[3].text}) ")
+                                        procedure_changes_output_file.write(f"{record[2].text}\n")
+                                    else:
+                                        pass
+                            else:
+                                # If it gets here, this means the Airport is not in the APT.TXT for that ARTCC.
+                                pass
+
+            procedure_changes_output_file.close()
+            apt_in_artcc.close()
 
     def show_frame(self, page_name):
         """Show a frame for the given page name"""
@@ -254,11 +441,11 @@ class StartScreen(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.controller.title("ARTCC Airport List Creator")
+        self.controller.title("ARTCC PUBLICATIONS PARSER")
         self.config(bg=controller.frame_bg_color)
 
         # Define Label Widget Var
-        text_first_screen = "Put credits and shit here"
+        text_first_screen = ""
 
         # Create Label Widgets
         spacer = tk.Label(self, text="                              ",
@@ -273,8 +460,8 @@ class StartScreen(tk.Frame):
         b1 = tk.Button(self, text="Start", width=40,
                        command=lambda: controller.show_frame("UserInputScreen"),
                        bg=controller.button_bg_color, fg=controller.button_fg_color)
-        b2 = tk.Button(self, text="Quit", width=40,
-                       command=quit, bg=controller.button_bg_color, fg=controller.button_fg_color)
+        b2 = tk.Button(self, text="exit", width=40,
+                       command=exit, bg=controller.button_bg_color, fg=controller.button_fg_color)
 
         # Insert the Widgets into the Window
         w1.grid(row=0, column=1)
@@ -296,11 +483,28 @@ class UserInputScreen(tk.Frame):
         global cal
         global w3_input
 
+        def artcc_selection(var1):
+            controller.user_input1 = var1
+
         def get_user_text():
-            controller.user_input1 = e1_input.get()
+            # get list of all artcc's possible
+            all_good = True
+            if controller.user_input1 == 'All Artcc':
+                controller.do_all = True
+                controller.all_artccs.remove('All Artcc')
+            else:
+                controller.do_all = False
+
+            # controller.user_input1 = e1_input.get()
             controller.user_input2 = e2_input.get()
             controller.user_input3 = cal.get_date()
-            controller.get_apt_txt()
+
+
+            if all_good == True:
+                controller.get_apt_txt()
+            else:
+                controller.show_frame("UserInputScreen")
+
 
         def start_prog(event):
             if controller.has_apt_file == "YES" and controller.has_meta_file == "YES":
@@ -315,6 +519,10 @@ class UserInputScreen(tk.Frame):
         w2_input_text = "AIRAC CYCLE: "
         w3_input_text = "AIRACC EFFECTIVE DATE:"
 
+        tkvar = tk.StringVar(controller)
+        tkvar.set('ZLC')
+        controller.user_input1 = 'ZLC'
+
         # Create Widgets
         input_logo = tk.Label(self, image=controller.logo,
                               bg=controller.image_bg_color, fg=controller.image_fg_color)
@@ -328,16 +536,21 @@ class UserInputScreen(tk.Frame):
                            bg=controller.label_bg_color, fg=controller.label_fg_color)
         spacer5 = tk.Label(self, justify=tk.LEFT, text="              ",
                            bg=controller.label_bg_color, fg=controller.label_fg_color)
+
         w1_input = tk.Label(self, justify=tk.RIGHT, text=w1_input_text,
                             bg=controller.label_bg_color, fg=controller.label_fg_color)
+
+        d1_input = tk.OptionMenu(self, tkvar, *controller.all_artccs, command=artcc_selection)
+        d1_input.config(width=30, bg=controller.entry_bg_color, fg=controller.entry_fg_color)
+
         w2_input = tk.Label(self, justify=tk.RIGHT, text=w2_input_text,
                             bg=controller.label_bg_color, fg=controller.label_fg_color)
         w3_input = tk.Label(self, justify=tk.RIGHT, text=w3_input_text,
                             bg=controller.label_bg_color, fg=controller.label_fg_color)
 
         # Create Entry Fields
-        e1_input = tk.Entry(self, width=40, textvariable=e1_var,
-                            bg=controller.entry_bg_color, fg=controller.entry_fg_color)
+        # e1_input = tk.Entry(self, width=40, textvariable=e1_var,
+        #                     bg=controller.entry_bg_color, fg=controller.entry_fg_color)
         e2_input = tk.Entry(self, width=40, textvariable=e2_var,
                             bg=controller.entry_bg_color, fg=controller.entry_fg_color)
         this_var = None
@@ -357,7 +570,8 @@ class UserInputScreen(tk.Frame):
         spacer1.grid(row=4, column=0)
         spacer2.grid(row=4, column=1)
         w1_input.grid(row=5, column=0)
-        e1_input.grid(row=5, column=1)
+        d1_input.grid(row=5, column=1, sticky='nesw')
+        # e1_input.grid(row=5, column=1)
         w2_input.grid(row=6, column=0)
         e2_input.grid(row=6, column=1)
         w3_input.grid(row=7, column=0)
@@ -414,8 +628,8 @@ class DirectoryViewScreen(tk.Frame):
                                  fg=controller.button_fg_color)
         b3 = tk.Button(self, text="Start", width=40, bg=controller.button_bg_color, fg=controller.button_fg_color,
                        command=lambda: controller.show_frame("UserInputScreen"))
-        b4 = tk.Button(self, text="Quit", width=40,
-                       command=quit, bg=controller.button_bg_color, fg=controller.button_fg_color)
+        b4 = tk.Button(self, text="exit", width=40,
+                       command=exit, bg=controller.button_bg_color, fg=controller.button_fg_color)
 
         # Insert ALL into the window
         logo.grid(row=0, column=0, columnspan=2)
@@ -516,7 +730,7 @@ class CompletedScreen(tk.Frame):
                        command=lambda: controller.show_frame("UserInputScreen"),
                        bg=controller.button_bg_color, fg=controller.button_fg_color)
         b2 = tk.Button(self, text="No, I got what I needed.", width=40,
-                       command=quit, bg=controller.button_bg_color, fg=controller.button_fg_color)
+                       command=exit, bg=controller.button_bg_color, fg=controller.button_fg_color)
 
         logo.grid(row=0, column=0, columnspan=2)
         spacer.grid(row=1, column=0, columnspan=2)
@@ -550,6 +764,9 @@ class DownLoadingScreen(tk.Frame):
 
 
 
-if __name__ == "__main__":
+try:
     app = NasrParser()
     app.mainloop()
+except MemoryError:
+    print("MEMORY ERROR")
+    exit()
