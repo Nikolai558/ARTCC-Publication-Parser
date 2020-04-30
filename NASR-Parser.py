@@ -132,7 +132,7 @@ class NasrParser(tk.Tk):
             input_file = None
 
             try:
-                input_file = open(f"{self.in_directory}/APT.txt", "r")
+                input_file = open(f"{self.in_directory}/APT.txt", "r", errors='replace')
                 print(f"APT.TXT FILE FOUND: {self.in_directory}")
             except FileNotFoundError:
                 # Basic error message right now. Need to have in case user selects wrong input directory.
@@ -192,7 +192,7 @@ class NasrParser(tk.Tk):
             input_file = None
 
             try:
-                input_file = open(f"{self.in_directory}/APT.txt", "r")
+                input_file = open(f"{self.in_directory}/APT.txt", "r", errors='replace')
                 print(f"APT.TXT FILE FOUND: {self.in_directory}")
             except FileNotFoundError:
                 # Basic error message right now. Need to have in case user selects wrong input directory.
@@ -331,7 +331,6 @@ class NasrParser(tk.Tk):
 
                     procedure_changes_output_file.close()
                     apt_in_artcc.close()
-                    meta_file.close()
                 else:
                     pass
         else:
