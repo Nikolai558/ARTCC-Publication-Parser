@@ -34,6 +34,7 @@
             this.zlcLogo = new System.Windows.Forms.PictureBox();
             this.startDisclaimerText = new System.Windows.Forms.RichTextBox();
             this.startButton = new System.Windows.Forms.Button();
+            this.aboutButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.vatusaLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.vatsimLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.zlcLogo)).BeginInit();
@@ -87,12 +88,24 @@
             this.startButton.BackColor = System.Drawing.SystemColors.ControlDark;
             this.startButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.startButton.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.startButton.Location = new System.Drawing.Point(298, 427);
+            this.startButton.Location = new System.Drawing.Point(235, 427);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(164, 23);
             this.startButton.TabIndex = 4;
-            this.startButton.Text = "Start";
+            this.startButton.Text = "START";
             this.startButton.UseVisualStyleBackColor = false;
+            // 
+            // aboutButton
+            // 
+            this.aboutButton.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.aboutButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.aboutButton.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.aboutButton.Location = new System.Drawing.Point(405, 427);
+            this.aboutButton.Name = "aboutButton";
+            this.aboutButton.Size = new System.Drawing.Size(164, 23);
+            this.aboutButton.TabIndex = 5;
+            this.aboutButton.Text = "ABOUT";
+            this.aboutButton.UseVisualStyleBackColor = false;
             // 
             // MainWindow
             // 
@@ -100,12 +113,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(767, 462);
+            this.Controls.Add(this.aboutButton);
             this.Controls.Add(this.startButton);
             this.Controls.Add(this.startDisclaimerText);
             this.Controls.Add(this.vatusaLogo);
             this.Controls.Add(this.vatsimLogo);
             this.Controls.Add(this.zlcLogo);
-            this.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ForeColor = System.Drawing.SystemColors.Control;
             this.Name = "MainWindow";
             this.Text = "ARTCC Publication Parser";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -123,6 +137,7 @@
         private System.Windows.Forms.PictureBox vatusaLogo;
         private System.Windows.Forms.RichTextBox startDisclaimerText;
         private System.Windows.Forms.Button startButton;
+        private System.Windows.Forms.Button aboutButton;
     }
 }
 
