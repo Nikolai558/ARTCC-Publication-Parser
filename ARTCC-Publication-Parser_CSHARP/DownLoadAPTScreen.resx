@@ -117,19 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="startDisclaimerText.Text" xml:space="preserve">
-    <value>*** Not for Real World Navigation ***
-
-                                                              ARTCC Publication Parser V-1.0.0
-
-Gather FAA data and parse through it to show the following:
-	* Airports in a certain ARTCC
-	* All Insrument Procedures for those airports
-	* Any changes from the previous AIRACC cycle and the next AIRACC cycle
-
-Creators, special thanks, and credits located in the "About" screen.
-
-Use program at your own risk. Contact creator/developer for bugs or issues.
-Program is located on GitHub at https://........................</value>
-  </data>
 </root>

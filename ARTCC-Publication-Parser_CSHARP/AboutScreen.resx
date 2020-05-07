@@ -117,19 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="startDisclaimerText.Text" xml:space="preserve">
-    <value>*** Not for Real World Navigation ***
+  <data name="aboutAndCredits.Text" xml:space="preserve">
+    <value>This Program, the ARTCC Publication Parser, is designed to help facility engineers (FE) all over the vatsim vertual aviation community to gather FAA procedures in one place. Instead of manually searching and entering the FAA data publiclly provided, you can now run this program to gather, sort, and parse through the data for you automatically. Vatsim is all about being as realistic as possible. The goal and hope is to cut down the work load required from FE's and help add some automation into their process.  
 
-                                                              ARTCC Publication Parser V-1.0.0
+Innovator - Kyle Sanders (CID: 1187148)
+Developer - Nikolas Boling (CID: 1474952)
 
-Gather FAA data and parse through it to show the following:
-	* Airports in a certain ARTCC
-	* All Insrument Procedures for those airports
-	* Any changes from the previous AIRACC cycle and the next AIRACC cycle
-
-Creators, special thanks, and credits located in the "About" screen.
-
-Use program at your own risk. Contact creator/developer for bugs or issues.
-Program is located on GitHub at https://........................</value>
+Special thanks to: 
+	Wes Loeffler (CID: 1305554)
+	Michael Romashov (CID: 0000000)
+	Chuck Kowalewski (CID: 0000000)
+</value>
   </data>
 </root>

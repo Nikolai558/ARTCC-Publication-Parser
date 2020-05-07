@@ -94,6 +94,7 @@
             this.startButton.TabIndex = 4;
             this.startButton.Text = "START";
             this.startButton.UseVisualStyleBackColor = false;
+            this.aboutButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
             // aboutButton
             // 
@@ -106,6 +107,7 @@
             this.aboutButton.TabIndex = 5;
             this.aboutButton.Text = "ABOUT";
             this.aboutButton.UseVisualStyleBackColor = false;
+            this.aboutButton.Click += new System.EventHandler(this.AboutButton_Click);
             // 
             // MainWindow
             // 

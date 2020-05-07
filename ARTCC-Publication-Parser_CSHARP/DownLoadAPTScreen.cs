@@ -10,16 +10,11 @@ using System.Windows.Forms;
 
 namespace ARTCC_Publication_Parser_CSHARP
 {
-    public partial class AboutScreen : Form
+    public partial class DownLoadAPTScreen : Form
     {
-        public AboutScreen()
+        public DownLoadAPTScreen()
         {
             InitializeComponent();
-        }
-
-        private void aboutAndCredits_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

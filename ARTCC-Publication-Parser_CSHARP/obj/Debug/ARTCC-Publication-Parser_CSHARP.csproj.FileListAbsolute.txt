@@ -8,3 +8,5 @@ C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Pa
 C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Parser_CSHARP\ARTCC-Publication-Parser_CSHARP\obj\Debug\ARTCC-Publication-Parser_CSHARP.csproj.CoreCompileInputs.cache
 C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Parser_CSHARP\ARTCC-Publication-Parser_CSHARP\obj\Debug\ARTCC-Publication-Parser_CSHARP.exe
 C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Parser_CSHARP\ARTCC-Publication-Parser_CSHARP\obj\Debug\ARTCC-Publication-Parser_CSHARP.pdb
+C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Parser_CSHARP\ARTCC-Publication-Parser_CSHARP\obj\Debug\ARTCC_Publication_Parser_CSHARP.AboutScreen.resources
+C:\Users\Pocono Coast West\Desktop\ARTCC-Publication-Parser\ARTCC-Publication-Parser_CSHARP\ARTCC-Publication-Parser_CSHARP\obj\Debug\ARTCC_Publication_Parser_CSHARP.DownLoadAPTScreen.resources
