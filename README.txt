@@ -1,4 +1,4 @@
-ARTCC-Publication-Parser
+ARTCC-Publication-Parser (C#)
 
 *******************************
 Version 1.0.0
