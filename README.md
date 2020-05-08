@@ -30,10 +30,12 @@ Requirements:
 	
 *******************************
 Feature Requests: 
-	
+	Better GUI
 
 *******************************
 Known Issues:
+	Crash if invalid AIRACC Date Selected
+	Memmory Error
 	
 
 *******************************
