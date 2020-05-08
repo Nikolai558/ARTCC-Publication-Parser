@@ -10,25 +10,27 @@ from tkcalendar import DateEntry
 from babel.numbers import *
 from zipfile import ZipFile
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 
 class NasrParser(tk.Tk):
     def __init__(self, *args, **kwargs):
+        # Set the user_input to be none at the beggining of the program.
         self.user_input1 = None
         self.user_input2 = None
         self.user_input3 = None
-
+        # This will tell the program to complete all ARTCC's. By default it is True, however it is changed later.
         self.do_all = True
-
+        # TODO: This can't be hardcoded in. I need to find a way to get this data.
         self.all_artccs = ['All Artcc', 'ZAP', 'ZAN', 'ZJX', 'ZME', 'ZTL', 'ZHU', 'ZID', 'ZFW', 'ZKC', 'ZHN', 'ZAB',
                            'ZLA', 'ZDV', 'ZSE', 'ZOA', 'ZUA', 'ZBW', 'ZNY', 'ZDC', 'ZMA', 'ZAU', 'ZMP', 'ZLC', 'ZOB',
                            'ZYZ', 'ZSU', 'ZVR', 'ZEG', 'FIM', 'SBA', 'ZAK', 'ZUL', 'ZWG']
-
+        # Directories of user inputs and current exe location.
         self.exe_directory = os.getcwd()
         self.in_directory = os.getcwd()
         self.out_directory = os.getcwd()
         self.out_folder_name = "Error_Occurred"
-
+        # Setting all the colors for everything.
         self.label_fg_color = "black"
         self.label_bg_color = "dark gray"
         self.button_fg_color = "black"
@@ -38,25 +40,31 @@ class NasrParser(tk.Tk):
         self.image_fg_color = "black"
         self.image_bg_color = "dark gray"
         self.frame_bg_color = "dark gray"
-
+        # Variable to hold File locations needed.
         self.has_apt_file = None
         self.has_meta_file = None
-
+        # start the program.
         tk.Tk.__init__(self, *args, **kwargs)
         self.title_font = tkfont.Font(family='Helvetica', size=12, slant="italic")
         self.helv10 = tkfont.Font(family='Helvetica', size=10)
         self.helv12 = tkfont.Font(family='Helvetica', size=12)
-        self.logo = tk.PhotoImage(file="zlclogo.png")
-        self.wip = tk.PhotoImage(file="wip.png")
-
+        # ZLC Logo, Get from web.
+        zlc_img_url = requests.get("https://i.imgur.com/3SFeAHa.png")
+        zlc_img_data = zlc_img_url.content
+        self.logo = ImageTk.PhotoImage(Image.open(BytesIO(zlc_img_data)))
+        # Work in progress Pic, Get from Web
+        wip_img_url = requests.get("https://i.imgur.com/nyaxTUK.png")
+        wip_img_data = wip_img_url.content
+        self.wip = ImageTk.PhotoImage(Image.open(BytesIO(wip_img_data)))
+        # Menu Bar Variables.
         menu_bar = tk.Menu(self)
         instruction_menu = tk.Menu(menu_bar, tearoff=0)
         instruction_menu.add_command(label="About",
-                                     command=lambda: self.show_frame("WorkInProgress"))
+                                     command=lambda: self.show_frame("AboutScreen"))
         instruction_menu.add_command(label="Help",
                                      command=lambda: self.show_frame("WorkInProgress"))
         instruction_menu.add_separator()
-        instruction_menu.add_command(label="exit",
+        instruction_menu.add_command(label="Exit",
                                      command=lambda: self.show_frame("WorkInProgress"))
         menu_bar.add_cascade(label="About / Help", menu=instruction_menu)
         self.config(menu=menu_bar)
@@ -71,7 +79,7 @@ class NasrParser(tk.Tk):
 
         self.frames = {}
         for F in (StartScreen, UserInputScreen, DirectoryViewScreen, WorkInProgress,
-                  SplashScreen, CompletedScreen, DownLoadingScreen):
+                  SplashScreen, CompletedScreen, DownLoadingScreen, AboutScreen):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
@@ -80,18 +88,6 @@ class NasrParser(tk.Tk):
             # will be the one that is visible.
             frame.grid(row=0, column=0, sticky="nsew")
         self.show_frame("SplashScreen")
-
-    # def artcc_list(self):
-    #     with open(f"{self.in_directory}/APT.txt", "r") as apt_file:
-    #         text = apt_file.read()
-    #         lines = text.split("\n")
-    #
-    #         for line in lines:
-    #             line_type = line[0:3]
-    #             if line_type == "APT":
-    #                 code = line[674:677]
-    #                 self.all_artccs.append(code)
-
 
     def get_apt_txt(self):
         if self.has_apt_file == "NO":
@@ -581,8 +577,6 @@ class UserInputScreen(tk.Frame):
         # b2_input.grid(row=9, column=1)
 
 
-
-
 class DirectoryViewScreen(tk.Frame):
     """ This is the Directory Viewer/Selector window. It is displayed when the user clicks on the button
     'View Directories' """
@@ -599,9 +593,9 @@ class DirectoryViewScreen(tk.Frame):
         logo = tk.Label(self, image=controller.logo, bg=controller.image_bg_color, fg=controller.image_fg_color)
 
         # Define Widget Var
-        w1_directory_text = "Input Directory: "
+        w1_directory_text = "APT.TXT File Location: "
         w2_directory_text = controller.in_directory
-        w3_directory_text = "Output Directory: "
+        w3_directory_text = "Parsed Data Output Directory: "
         w4_directory_text = controller.out_directory
 
         # Create Widgets
@@ -627,7 +621,7 @@ class DirectoryViewScreen(tk.Frame):
                                  fg=controller.button_fg_color)
         b3 = tk.Button(self, text="Start", width=40, bg=controller.button_bg_color, fg=controller.button_fg_color,
                        command=lambda: controller.show_frame("UserInputScreen"))
-        b4 = tk.Button(self, text="exit", width=40,
+        b4 = tk.Button(self, text="Exit", width=40,
                        command=exit, bg=controller.button_bg_color, fg=controller.button_fg_color)
 
         # Insert ALL into the window
@@ -761,6 +755,41 @@ class DownLoadingScreen(tk.Frame):
         w1_download.grid(row=5, column=0, columnspan=2)
         spacer2.grid(row=6, column=0, columnspan=2)
 
+
+class AboutScreen(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.config(bg=controller.frame_bg_color)
+        logo = tk.Label(self, image=controller.logo, bg=controller.image_bg_color, fg=controller.image_fg_color)
+        text1 = tk.Label(self, text="This Program, the ARTCC Publication Parser, is designed to help facility\n "
+                                    "engineers (FE) all over the vatsim virtual aviation community to gather\n"
+                                    "FAA procedures in one place. Instead of manually searching and entering the\n"
+                                    "FAA data publicly provided, you can now run this program to gather, sort, \n"
+                                    "and parse through the data for you automatically. Vatsim is all about being as\n"
+                                    "realistic as possible. The goal and hope is to cut down the work load required\n"
+                                    "from FE's and help add some automation into their process.",
+                          bg=controller.label_bg_color, fg=controller.label_fg_color)
+        text2 = tk.Label(self, text="Conceptual Designer - Kyle Sanders (CID: 1187148)\n"
+                                    "Developer - Nikolas Boling (CID: 1474952)",
+                          bg=controller.label_bg_color, fg=controller.label_fg_color)
+        text3 = tk.Label(self, text="Special thanks to:\n"
+                                    "Wes Loeffler (CID: 1305554)\n"
+                                    "Michael Romashov (CID: 1391803)\n"
+                                    "Chuck Kowalewski (CID: 1429208)",
+                          bg=controller.label_bg_color, fg=controller.label_fg_color)
+
+        b1 = tk.Button(self,
+                       text="Go Back To Start Screen",
+                       width=50,
+                       bg=controller.button_bg_color, fg=controller.button_fg_color,
+                       command=lambda: controller.show_frame("SplashScreen"))
+
+        b1.grid(row=4, column=0)
+        logo.grid(row=0, column=0)
+        text1.grid(row=1, column=0)
+        text2.grid(row=2, column=0)
+        text3.grid(row=3, column=0)
 
 
 try:
