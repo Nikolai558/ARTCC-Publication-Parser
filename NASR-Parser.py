@@ -169,6 +169,14 @@ class NasrParser(tk.Tk):
                                                                                              self.user_input2,
                                                                                              working_artcc,
                                                                                              self.user_input2), "w")
+
+                    apt_ICAO_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_AIRPORTS_ICAO.TXT".format(self.out_directory,
+                                                                                             self.user_input2,
+                                                                                             working_artcc,
+                                                                                             self.user_input2,
+                                                                                             working_artcc,
+                                                                                             self.user_input2), "w")
+
                     for line in lines:
                         line_type = line[0:3]
                         artcc = line[674:677]
@@ -179,7 +187,13 @@ class NasrParser(tk.Tk):
                                 f_string = "%s\n" % airport
                                 apt_output_file.write(f_string)
 
+                                icao = line[1210:1217]
+                                f1_string = "%s\n" % icao
+
+                                apt_ICAO_output_file.write(f1_string)
+
                     apt_output_file.close()
+                    apt_ICAO_output_file.close()
 
                 else:
                     pass
@@ -217,6 +231,12 @@ class NasrParser(tk.Tk):
                                                                         self.user_input1,
                                                                         self.user_input2), "w")
 
+            apt_ICAO_output_file = open("{}/{}_{}/{}_{}_AIRPORTS_ICAO.TXT".format(self.out_directory,
+                                                                        self.user_input1,
+                                                                        self.user_input2,
+                                                                        self.user_input1,
+                                                                        self.user_input2), "w")
+
             for line in lines:
                 line_type = line[0:3]
                 artcc = line[674:677]
@@ -227,7 +247,17 @@ class NasrParser(tk.Tk):
                         f_string = "%s\n" % airport
                         apt_output_file.write(f_string)
 
+                        icao = ""
+                        if line[1210:1217].strip() != "":
+                            icao = line[1210:1217].strip()
+                        else:
+                            icao = line[27:31].strip()
+                        f1_string = "%s\n" % icao
+
+                        apt_ICAO_output_file.write(f1_string)
+
             apt_output_file.close()
+            apt_ICAO_output_file.close()
             input_file.close()
 
 
