@@ -163,14 +163,14 @@ class NasrParser(tk.Tk):
                         # We don't need to do anything if this is the case we just Pass.
                         pass
 
-                    apt_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+                    apt_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_FAA_APT_CODES.TXT".format(self.out_directory,
                                                                                              self.user_input2,
                                                                                              working_artcc,
                                                                                              self.user_input2,
                                                                                              working_artcc,
                                                                                              self.user_input2), "w")
 
-                    apt_ICAO_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_AIRPORTS_ICAO.TXT".format(self.out_directory,
+                    apt_ICAO_output_file = open("{}/All Artcc_{}/{}_{}/{}_{}_ICAO_APT_CODES.TXT".format(self.out_directory,
                                                                                              self.user_input2,
                                                                                              working_artcc,
                                                                                              self.user_input2,
@@ -187,7 +187,10 @@ class NasrParser(tk.Tk):
                                 f_string = "%s\n" % airport
                                 apt_output_file.write(f_string)
 
-                                icao = line[1210:1217]
+                                if line[1210:1217].strip() != "":
+                                    icao = line[1210:1217].strip()
+                                else:
+                                    icao = line[27:31].strip()
                                 f1_string = "%s\n" % icao
 
                                 apt_ICAO_output_file.write(f1_string)
@@ -225,13 +228,13 @@ class NasrParser(tk.Tk):
 
             # Create the Three output files we need. This is okay as long as we close them when we are done with them.
 
-            apt_output_file = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+            apt_output_file = open("{}/{}_{}/{}_{}_FAA_APT_CODES.TXT".format(self.out_directory,
                                                                         self.user_input1,
                                                                         self.user_input2,
                                                                         self.user_input1,
                                                                         self.user_input2), "w")
 
-            apt_ICAO_output_file = open("{}/{}_{}/{}_{}_AIRPORTS_ICAO.TXT".format(self.out_directory,
+            apt_ICAO_output_file = open("{}/{}_{}/{}_{}_ICAO_APT_CODES.TXT".format(self.out_directory,
                                                                         self.user_input1,
                                                                         self.user_input2,
                                                                         self.user_input1,
@@ -247,7 +250,6 @@ class NasrParser(tk.Tk):
                         f_string = "%s\n" % airport
                         apt_output_file.write(f_string)
 
-                        icao = ""
                         if line[1210:1217].strip() != "":
                             icao = line[1210:1217].strip()
                         else:
@@ -296,7 +298,7 @@ class NasrParser(tk.Tk):
 
                     procedure_changes_output_file = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_PROCEDURE_CHANGES.TXT", "w")
 
-                    apt_in_artcc = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_AIRPORTS.TXT", "r")
+                    apt_in_artcc = open(f"{self.out_directory}/All Artcc_{self.user_input2}/{working_artcc}_{self.user_input2}/{working_artcc}_{self.user_input2}_FAA_APT_CODES.TXT", "r")
 
                     apt_txt = apt_in_artcc.read()
                     apt_lines = apt_txt.split("\n")
@@ -328,6 +330,10 @@ class NasrParser(tk.Tk):
                                 for line in apt_lines:
                                     wanted_apt = line[:].strip(" ")
                                     if wanted_apt == airport.attrib['apt_ident']:
+                                        #if airport.attrib['apt_ident']['record'] == "":
+                                        #    print("NO CHANGES, ADDITIONS, or DELETIONS FOR {}".format(airport.attrib['apt_ident']))
+                                        #    continue
+                                        #else:
                                         procedure_changes_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
 
                                         for record in airport.iter('record'):
@@ -370,7 +376,7 @@ class NasrParser(tk.Tk):
                                                                                                self.user_input2,
                                                                                                self.user_input1,
                                                                                                self.user_input2), "w")
-            apt_in_artcc = open("{}/{}_{}/{}_{}_AIRPORTS.TXT".format(self.out_directory,
+            apt_in_artcc = open("{}/{}_{}/{}_{}_FAA_APT_CODES.TXT".format(self.out_directory,
                                                                      self.user_input1,
                                                                      self.user_input2,
                                                                      self.user_input1,
@@ -407,7 +413,13 @@ class NasrParser(tk.Tk):
                         for line in apt_lines:
                             wanted_apt = line[:].strip(" ")
                             if wanted_apt == airport.attrib['apt_ident']:
+                                #if airport.iter('record')[2].text == "":
+                                #    print("NO CHANGES, ADDITIONS, or DELETIONS FOR {}".format(
+                                #        airport.attrib['apt_ident']))
+                                #    continue
+                                #else:
                                 procedure_output_file.write(f"[{airport.attrib['apt_ident']}]\n")
+
                                 for record in airport.iter('record'):
                                     procedure_output_file.write(f"      {record[2].text} ")
                                     procedure_output_file.write("| https://aeronav.faa.gov/d-tpp/{}/{}\n".format(
