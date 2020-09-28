@@ -2,7 +2,7 @@
 
 ARTCC-Publication-Parser
 *******************************
-Version 1.0.0
+Version 1.0.2
 Created on 5/6/2020
 Last update: 5/8/2020 1500 MT
 Created By Nikolas Boling, Kyle Sanders
